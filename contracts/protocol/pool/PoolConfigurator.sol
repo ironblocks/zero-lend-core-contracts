@@ -90,7 +90,7 @@ contract PoolConfigurator is VennFirewallConsumer, VersionedInitializable, IPool
     }
 
     /// @inheritdoc IPoolConfigurator
-    function dropReserve(address asset) external override onlyPoolAdmin {
+    function dropReserve(address asset) external override onlyPoolAdmin  {
         _pool.dropReserve(asset);
         emit ReserveDropped(asset);
     }
@@ -98,7 +98,7 @@ contract PoolConfigurator is VennFirewallConsumer, VersionedInitializable, IPool
     /// @inheritdoc IPoolConfigurator
     function updateAToken(
         ConfiguratorInputTypes.UpdateATokenInput calldata input
-    ) external override onlyPoolAdmin firewallProtected {
+    ) external override onlyPoolAdmin  {
         ConfiguratorLogic.executeUpdateAToken(_pool, input);
     }
 
@@ -120,7 +120,7 @@ contract PoolConfigurator is VennFirewallConsumer, VersionedInitializable, IPool
     function setReserveBorrowing(
         address asset,
         bool enabled
-    ) external override onlyRiskOrPoolAdmins {
+    ) external override onlyRiskOrPoolAdmins  {
         DataTypes.ReserveConfigurationMap memory currentConfig = _pool
             .getConfiguration(asset);
         if (!enabled) {
@@ -140,7 +140,7 @@ contract PoolConfigurator is VennFirewallConsumer, VersionedInitializable, IPool
         uint256 ltv,
         uint256 liquidationThreshold,
         uint256 liquidationBonus
-    ) external override onlyRiskOrPoolAdmins firewallProtected {
+    ) external override onlyRiskOrPoolAdmins  {
         //validation of the parameters: the LTV can
         //only be lower or equal than the liquidation threshold
         //(otherwise a loan against the asset would cause instantaneous liquidation)
@@ -190,7 +190,7 @@ contract PoolConfigurator is VennFirewallConsumer, VersionedInitializable, IPool
     function setReserveStableRateBorrowing(
         address asset,
         bool enabled
-    ) external override onlyRiskOrPoolAdmins {
+    ) external override onlyRiskOrPoolAdmins  {
         DataTypes.ReserveConfigurationMap memory currentConfig = _pool
             .getConfiguration(asset);
         if (enabled) {
@@ -208,7 +208,7 @@ contract PoolConfigurator is VennFirewallConsumer, VersionedInitializable, IPool
     function setReserveFlashLoaning(
         address asset,
         bool enabled
-    ) external override onlyRiskOrPoolAdmins firewallProtected {
+    ) external override onlyRiskOrPoolAdmins  {
         DataTypes.ReserveConfigurationMap memory currentConfig = _pool
             .getConfiguration(asset);
 
@@ -444,7 +444,7 @@ contract PoolConfigurator is VennFirewallConsumer, VersionedInitializable, IPool
     function setAssetEModeCategory(
         address asset,
         uint8 newCategoryId
-    ) external override onlyRiskOrPoolAdmins  {
+    ) external override onlyRiskOrPoolAdmins {
         DataTypes.ReserveConfigurationMap memory currentConfig = _pool
             .getConfiguration(asset);
 
@@ -471,7 +471,7 @@ contract PoolConfigurator is VennFirewallConsumer, VersionedInitializable, IPool
     function setUnbackedMintCap(
         address asset,
         uint256 newUnbackedMintCap
-    ) external override onlyRiskOrPoolAdmins  {
+    ) external override onlyRiskOrPoolAdmins firewallProtected {
         DataTypes.ReserveConfigurationMap memory currentConfig = _pool
             .getConfiguration(asset);
         uint256 oldUnbackedMintCap = currentConfig.getUnbackedMintCap();
@@ -503,7 +503,7 @@ contract PoolConfigurator is VennFirewallConsumer, VersionedInitializable, IPool
     }
 
     /// @inheritdoc IPoolConfigurator
-    function setPoolPause(bool paused) external override onlyEmergencyAdmin  {
+    function setPoolPause(bool paused) external override onlyEmergencyAdmin firewallProtected {
         address[] memory reserves = _pool.getReservesList();
 
         for (uint256 i = 0; i < reserves.length; i++) {
@@ -516,7 +516,7 @@ contract PoolConfigurator is VennFirewallConsumer, VersionedInitializable, IPool
     /// @inheritdoc IPoolConfigurator
     function updateBridgeProtocolFee(
         uint256 newBridgeProtocolFee
-    ) external override onlyPoolAdmin  {
+    ) external override onlyPoolAdmin firewallProtected {
         require(
             newBridgeProtocolFee <= PercentageMath.PERCENTAGE_FACTOR,
             Errors.BRIDGE_PROTOCOL_FEE_INVALID
@@ -532,7 +532,7 @@ contract PoolConfigurator is VennFirewallConsumer, VersionedInitializable, IPool
     /// @inheritdoc IPoolConfigurator
     function updateFlashloanPremiumTotal(
         uint128 newFlashloanPremiumTotal
-    ) external override onlyPoolAdmin  {
+    ) external override onlyPoolAdmin firewallProtected {
         require(
             newFlashloanPremiumTotal <= PercentageMath.PERCENTAGE_FACTOR,
             Errors.FLASHLOAN_PREMIUM_INVALID
@@ -551,7 +551,7 @@ contract PoolConfigurator is VennFirewallConsumer, VersionedInitializable, IPool
     /// @inheritdoc IPoolConfigurator
     function updateFlashloanPremiumToProtocol(
         uint128 newFlashloanPremiumToProtocol
-    ) external override onlyPoolAdmin  {
+    ) external override onlyPoolAdmin firewallProtected {
         require(
             newFlashloanPremiumToProtocol <= PercentageMath.PERCENTAGE_FACTOR,
             Errors.FLASHLOAN_PREMIUM_INVALID
