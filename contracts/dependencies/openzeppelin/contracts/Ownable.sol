@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.12;
 
-import './Context.sol';
+import './LocalContext.sol';
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -16,7 +16,7 @@ import './Context.sol';
  * `onlyOwner`, which can be applied to your functions to restrict their use to
  * the owner.
  */
-contract Ownable is Context {
+contract Ownable is LocalContext {
   address private _owner;
 
   event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);

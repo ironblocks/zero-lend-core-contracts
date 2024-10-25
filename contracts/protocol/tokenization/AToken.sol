@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.12;
 
+import {VennFirewallConsumer} from "@ironblocks/firewall-consumer/contracts/consumers/VennFirewallConsumer.sol";
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {GPv2SafeERC20} from '../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
@@ -14,13 +15,14 @@ import {IInitializableAToken} from '../../interfaces/IInitializableAToken.sol';
 import {ScaledBalanceTokenBase} from './base/ScaledBalanceTokenBase.sol';
 import {IncentivizedERC20} from './base/IncentivizedERC20.sol';
 import {EIP712Base} from './base/EIP712Base.sol';
+import {Context} from '@openzeppelin/contracts/utils/Context.sol';
 
 /**
  * @title Aave ERC20 AToken
  * @author Aave
  * @notice Implementation of the interest bearing token for the Aave protocol
  */
-contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, IAToken {
+contract AToken is VennFirewallConsumer, VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, IAToken {
   using WadRayMath for uint256;
   using SafeCast for uint256;
   using GPv2SafeERC20 for IERC20;
@@ -88,7 +90,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     address onBehalfOf,
     uint256 amount,
     uint256 index
-  ) external virtual override onlyPool returns (bool) {
+  ) external virtual override onlyPool firewallProtected returns (bool) {
     return _mintScaled(caller, onBehalfOf, amount, index);
   }
 
@@ -98,7 +100,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     address receiverOfUnderlying,
     uint256 amount,
     uint256 index
-  ) external virtual override onlyPool {
+  ) external virtual override onlyPool firewallProtected {
     _burnScaled(from, receiverOfUnderlying, amount, index);
     if (receiverOfUnderlying != address(this)) {
       IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
@@ -106,7 +108,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
   }
 
   /// @inheritdoc IAToken
-  function mintToTreasury(uint256 amount, uint256 index) external virtual override onlyPool {
+  function mintToTreasury(uint256 amount, uint256 index) external virtual override onlyPool firewallProtected {
     if (amount == 0) {
       return;
     }
@@ -118,7 +120,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     address from,
     address to,
     uint256 value
-  ) external virtual override onlyPool {
+  ) external virtual override onlyPool firewallProtected {
     // Being a normal transfer, the Transfer() and BalanceTransfer() are emitted
     // so no need to emit a specific event here
     _transfer(from, to, value, false);
@@ -153,7 +155,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
   }
 
   /// @inheritdoc IAToken
-  function transferUnderlyingTo(address target, uint256 amount) external virtual override onlyPool {
+  function transferUnderlyingTo(address target, uint256 amount) external virtual override onlyPool firewallProtected {
     IERC20(_underlyingAsset).safeTransfer(target, amount);
   }
 
@@ -162,7 +164,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     address user,
     address onBehalfOf,
     uint256 amount
-  ) external virtual override onlyPool {
+  ) external virtual override onlyPool firewallProtected {
     // Intentionally left blank
   }
 
@@ -249,16 +251,24 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
   }
 
   /// @inheritdoc IAToken
-  function rescueTokens(address token, address to, uint256 amount) external override onlyPoolAdmin {
+  function rescueTokens(address token, address to, uint256 amount) external override onlyPoolAdmin firewallProtected {
     require(token != _underlyingAsset, Errors.UNDERLYING_CANNOT_BE_RESCUED);
     IERC20(token).safeTransfer(to, amount);
   }
 
-  function setTreasury(address __treasury) external onlyPoolAdmin {
+  function setTreasury(address __treasury) external onlyPoolAdmin firewallProtected {
     _treasury = __treasury;
   }
 
-  function recall(address from, address to, uint256 amount) external onlyPoolAdmin {
+  function recall(address from, address to, uint256 amount) external onlyPoolAdmin firewallProtected {
     _transfer(from, to, amount, true);
+  }
+
+  function _msgSender() internal view virtual override(IncentivizedERC20, Context) returns (address) {
+    return super._msgSender();
+  }
+
+  function _msgData() internal view virtual override(IncentivizedERC20, Context) returns (bytes calldata) {
+    return super._msgData();
   }
 }

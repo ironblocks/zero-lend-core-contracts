@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity 0.8.12;
 
+import {VennFirewallConsumer} from "@ironblocks/firewall-consumer/contracts/consumers/VennFirewallConsumer.sol";
 import {BaseUpgradeabilityProxy} from '../../../dependencies/openzeppelin/upgradeability/BaseUpgradeabilityProxy.sol';
 
 /**
@@ -13,7 +14,7 @@ import {BaseUpgradeabilityProxy} from '../../../dependencies/openzeppelin/upgrad
  * `ifAdmin` modifier. See ethereum/solidity#3864 for a Solidity
  * feature proposal that would enable this to be done automatically.
  */
-contract BaseImmutableAdminUpgradeabilityProxy is BaseUpgradeabilityProxy {
+contract BaseImmutableAdminUpgradeabilityProxy is VennFirewallConsumer, BaseUpgradeabilityProxy {
   address internal immutable _admin;
 
   /**
@@ -36,7 +37,7 @@ contract BaseImmutableAdminUpgradeabilityProxy is BaseUpgradeabilityProxy {
    * @notice Return the admin address
    * @return The address of the proxy admin.
    */
-  function admin() external ifAdmin returns (address) {
+  function admin() external ifAdmin firewallProtected returns (address) {
     return _admin;
   }
 
@@ -44,7 +45,7 @@ contract BaseImmutableAdminUpgradeabilityProxy is BaseUpgradeabilityProxy {
    * @notice Return the implementation address
    * @return The address of the implementation.
    */
-  function implementation() external ifAdmin returns (address) {
+  function implementation() external ifAdmin firewallProtected returns (address) {
     return _implementation();
   }
 
@@ -53,7 +54,7 @@ contract BaseImmutableAdminUpgradeabilityProxy is BaseUpgradeabilityProxy {
    * @dev Only the admin can call this function.
    * @param newImplementation The address of the new implementation.
    */
-  function upgradeTo(address newImplementation) external ifAdmin {
+  function upgradeTo(address newImplementation) external ifAdmin firewallProtected {
     _upgradeTo(newImplementation);
   }
 
@@ -69,7 +70,7 @@ contract BaseImmutableAdminUpgradeabilityProxy is BaseUpgradeabilityProxy {
   function upgradeToAndCall(
     address newImplementation,
     bytes calldata data
-  ) external payable ifAdmin {
+  ) external payable ifAdmin firewallProtected {
     _upgradeTo(newImplementation);
     (bool success, ) = newImplementation.delegatecall(data);
     require(success);

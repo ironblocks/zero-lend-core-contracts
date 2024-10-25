@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.12;
 
+import {VennFirewallConsumer} from "@ironblocks/firewall-consumer/contracts/consumers/VennFirewallConsumer.sol";
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {MathUtils} from '../libraries/math/MathUtils.sol';
@@ -14,6 +15,7 @@ import {EIP712Base} from './base/EIP712Base.sol';
 import {DebtTokenBase} from './base/DebtTokenBase.sol';
 import {IncentivizedERC20} from './base/IncentivizedERC20.sol';
 import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
+import {Context} from '@openzeppelin/contracts/utils/Context.sol';
 
 /**
  * @title StableDebtToken
@@ -22,7 +24,7 @@ import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
  * at stable rate mode
  * @dev Transfer and approve functionalities are disabled since its a non-transferable token
  */
-contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
+contract StableDebtToken is VennFirewallConsumer, DebtTokenBase, IncentivizedERC20, IStableDebtToken {
   using WadRayMath for uint256;
   using SafeCast for uint256;
 
@@ -55,7 +57,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
     string memory debtTokenName,
     string memory debtTokenSymbol,
     bytes calldata params
-  ) external override initializer {
+  ) external override initializer firewallProtected {
     require(initializingPool == POOL, Errors.POOL_ADDRESSES_DO_NOT_MATCH);
     _setName(debtTokenName);
     _setSymbol(debtTokenSymbol);
@@ -75,7 +77,10 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
       debtTokenSymbol,
       params
     );
-  }
+  
+		_setAddressBySlot(bytes32(uint256(keccak256("eip1967.firewall")) - 1), address(0));
+		_setAddressBySlot(bytes32(uint256(keccak256("eip1967.firewall.admin")) - 1), msg.sender);
+	}
 
   /// @inheritdoc VersionedInitializable
   function getRevision() internal pure virtual override returns (uint256) {
@@ -120,7 +125,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
     address,
     uint256,
     uint256
-  ) external virtual override onlyPool returns (bool, uint256, uint256) {
+  ) external virtual override onlyPool firewallProtected returns (bool, uint256, uint256) {
     revert('STABLE_BORROWING_DEPRECATED');
   }
 
@@ -128,7 +133,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
   function burn(
     address from,
     uint256 amount
-  ) external virtual override onlyPool returns (uint256, uint256) {
+  ) external virtual override onlyPool firewallProtected returns (uint256, uint256) {
     (, uint256 currentBalance, uint256 balanceIncrease) = _calculateBalanceIncrease(from);
 
     uint256 previousSupply = totalSupply();
@@ -312,7 +317,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
    * @dev Being non transferrable, the debt token does not implement any of the
    * standard ERC20 functions for transfer and allowance.
    */
-  function transfer(address, uint256) external virtual override returns (bool) {
+  function transfer(address, uint256) external virtual override firewallProtected returns (bool) {
     revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
@@ -320,19 +325,27 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
     revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
-  function approve(address, uint256) external virtual override returns (bool) {
+  function approve(address, uint256) external virtual override firewallProtected returns (bool) {
     revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
-  function transferFrom(address, address, uint256) external virtual override returns (bool) {
+  function transferFrom(address, address, uint256) external virtual override firewallProtected returns (bool) {
     revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
-  function increaseAllowance(address, uint256) external virtual override returns (bool) {
+  function increaseAllowance(address, uint256) external virtual override firewallProtected returns (bool) {
     revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
-  function decreaseAllowance(address, uint256) external virtual override returns (bool) {
+  function decreaseAllowance(address, uint256) external virtual override firewallProtected returns (bool) {
     revert(Errors.OPERATION_NOT_SUPPORTED);
+  }
+
+  function _msgSender() internal view virtual override(IncentivizedERC20, DebtTokenBase, Context) returns (address) {
+    return super._msgSender();
+  }
+
+  function _msgData() internal view virtual override(IncentivizedERC20, DebtTokenBase, Context) returns (bytes calldata) {
+    return super._msgData();
   }
 }

@@ -442,7 +442,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
   }
 
   /// @inheritdoc IPool
-  function mintToTreasury(address[] calldata assets) external virtual override {
+  function mintToTreasury(address[] calldata assets) external virtual override  {
     PoolLogic.executeMintToTreasury(_reserves, assets);
   }
 
@@ -626,7 +626,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
   }
 
   /// @inheritdoc IPool
-  function dropReserve(address asset) external virtual override onlyPoolConfigurator {
+  function dropReserve(address asset) external virtual override onlyPoolConfigurator  {
     PoolLogic.executeDropReserve(_reserves, _reservesList, asset);
   }
 
@@ -634,7 +634,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
   function setReserveInterestRateStrategyAddress(
     address asset,
     address rateStrategyAddress
-  ) external virtual override onlyPoolConfigurator {
+  ) external virtual override onlyPoolConfigurator  {
     require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
     require(_reserves[asset].id != 0 || _reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
     _reserves[asset].interestRateStrategyAddress = rateStrategyAddress;
@@ -644,7 +644,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
   function setConfiguration(
     address asset,
     DataTypes.ReserveConfigurationMap calldata configuration
-  ) external virtual override onlyPoolConfigurator {
+  ) external virtual override onlyPoolConfigurator  {
     require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
     require(_reserves[asset].id != 0 || _reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
     _reserves[asset].configuration = configuration;
@@ -653,7 +653,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
   /// @inheritdoc IPool
   function updateBridgeProtocolFee(
     uint256 protocolFee
-  ) external virtual override onlyPoolConfigurator {
+  ) external virtual override onlyPoolConfigurator  {
     _bridgeProtocolFee = protocolFee;
   }
 
@@ -661,7 +661,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
   function updateFlashloanPremiums(
     uint128 flashLoanPremiumTotal,
     uint128 flashLoanPremiumToProtocol
-  ) external virtual override onlyPoolConfigurator {
+  ) external virtual override onlyPoolConfigurator  {
     _flashLoanPremiumTotal = flashLoanPremiumTotal;
     _flashLoanPremiumToProtocol = flashLoanPremiumToProtocol;
   }
@@ -670,7 +670,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
   function configureEModeCategory(
     uint8 id,
     DataTypes.EModeCategory memory category
-  ) external virtual override onlyPoolConfigurator {
+  ) external virtual override onlyPoolConfigurator  {
     // category 0 is reserved for volatile heterogeneous assets and it's always disabled
     require(id != 0, Errors.EMODE_CATEGORY_RESERVED);
     _eModeCategories[id] = category;
@@ -707,7 +707,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
   /// @inheritdoc IPool
   function resetIsolationModeTotalDebt(
     address asset
-  ) external virtual override onlyPoolConfigurator {
+  ) external virtual override onlyPoolConfigurator  {
     PoolLogic.executeResetIsolationModeTotalDebt(_reserves, asset);
   }
 
@@ -716,7 +716,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
     address token,
     address to,
     uint256 amount
-  ) external virtual override onlyPoolAdmin {
+  ) external virtual override onlyPoolAdmin  {
     PoolLogic.executeRescueTokens(token, to, amount);
   }
 

@@ -3,7 +3,7 @@
 pragma solidity 0.8.12;
 
 import './IAccessControl.sol';
-import './Context.sol';
+import './LocalContext.sol';
 import './Strings.sol';
 import './ERC165.sol';
 
@@ -45,7 +45,7 @@ import './ERC165.sol';
  * grant and revoke this role. Extra precautions should be taken to secure
  * accounts that have been granted it.
  */
-abstract contract AccessControl is Context, IAccessControl, ERC165 {
+abstract contract AccessControl is LocalContext, IAccessControl, ERC165 {
   struct RoleData {
     mapping(address => bool) members;
     bytes32 adminRole;

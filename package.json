@@ -92,5 +92,9 @@
   },
   "lint-staged": {
     "*.{ts,js,md,sol}": "prettier --write"
+  },
+  "dependencies": {
+    "@ironblocks/firewall-consumer": "1.0.17",
+    "@openzeppelin/contracts": "4.8.2"
   }
 }

@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.12;
 
+import {VennFirewallConsumer} from "@ironblocks/firewall-consumer/contracts/consumers/VennFirewallConsumer.sol";
 import {Ownable} from '../../dependencies/openzeppelin/contracts/Ownable.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {IPoolAddressesProviderRegistry} from '../../interfaces/IPoolAddressesProviderRegistry.sol';
+import {Context} from '@openzeppelin/contracts/utils/Context.sol';
+import {LocalContext} from '../../dependencies/openzeppelin/contracts/LocalContext.sol';
 
 /**
  * @title PoolAddressesProviderRegistry
@@ -12,7 +15,7 @@ import {IPoolAddressesProviderRegistry} from '../../interfaces/IPoolAddressesPro
  * @dev Used for indexing purposes of Aave protocol's markets. The id assigned to a PoolAddressesProvider refers to the
  * market it is connected with, for example with `1` for the Aave main market and `2` for the next created.
  */
-contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistry {
+contract PoolAddressesProviderRegistry is VennFirewallConsumer, Ownable, IPoolAddressesProviderRegistry {
   // Map of address provider ids (addressesProvider => id)
   mapping(address => uint256) private _addressesProviderToId;
   // Map of id to address provider (id => addressesProvider)
@@ -36,7 +39,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
   }
 
   /// @inheritdoc IPoolAddressesProviderRegistry
-  function registerAddressesProvider(address provider, uint256 id) external override onlyOwner {
+  function registerAddressesProvider(address provider, uint256 id) external override onlyOwner firewallProtected {
     require(id != 0, Errors.INVALID_ADDRESSES_PROVIDER_ID);
     require(_idToAddressesProvider[id] == address(0), Errors.INVALID_ADDRESSES_PROVIDER_ID);
     require(_addressesProviderToId[provider] == 0, Errors.ADDRESSES_PROVIDER_ALREADY_ADDED);
@@ -49,7 +52,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
   }
 
   /// @inheritdoc IPoolAddressesProviderRegistry
-  function unregisterAddressesProvider(address provider) external override onlyOwner {
+  function unregisterAddressesProvider(address provider) external override onlyOwner firewallProtected {
     require(_addressesProviderToId[provider] != 0, Errors.ADDRESSES_PROVIDER_NOT_REGISTERED);
     uint256 oldId = _addressesProviderToId[provider];
     _idToAddressesProvider[oldId] = address(0);
@@ -98,5 +101,13 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
       _addressesProvidersIndexes[lastProvider] = index;
     }
     _addressesProvidersList.pop();
+  }
+
+  function _msgSender() internal view virtual override(Context, LocalContext) returns (address) {
+    return super._msgSender();
+  }
+
+  function _msgData() internal view virtual override(Context, LocalContext) returns (bytes calldata) {
+    return super._msgData();
   }
 }

@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.12;
 
-import {Context} from '../../../dependencies/openzeppelin/contracts/Context.sol';
+import {VennFirewallConsumer} from "@ironblocks/firewall-consumer/contracts/consumers/VennFirewallConsumer.sol";
+import {VennFirewallConsumerBase} from "@ironblocks/firewall-consumer/contracts/consumers/VennFirewallConsumerBase.sol";
+import {LocalContext} from '../../../dependencies/openzeppelin/contracts/LocalContext.sol';
+import {Context} from '@openzeppelin/contracts/utils/Context.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IERC20Detailed} from '../../../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.sol';
@@ -17,7 +20,7 @@ import {IACLManager} from '../../../interfaces/IACLManager.sol';
  * @author Aave, inspired by the Openzeppelin ERC20 implementation
  * @notice Basic ERC20 implementation
  */
-abstract contract IncentivizedERC20 is Context, IERC20Detailed {
+abstract contract IncentivizedERC20 is VennFirewallConsumer, LocalContext, IERC20Detailed {
   using WadRayMath for uint256;
   using SafeCast for uint256;
 
@@ -114,12 +117,12 @@ abstract contract IncentivizedERC20 is Context, IERC20Detailed {
    * @notice Sets a new Incentives Controller
    * @param controller the new Incentives controller
    */
-  function setIncentivesController(IAaveIncentivesController controller) external onlyPoolAdmin {
+  function setIncentivesController(IAaveIncentivesController controller) external onlyPoolAdmin firewallProtected {
     _incentivesController = controller;
   }
 
   /// @inheritdoc IERC20
-  function transfer(address recipient, uint256 amount) external virtual override returns (bool) {
+  function transfer(address recipient, uint256 amount) external virtual override firewallProtected returns (bool) {
     uint128 castAmount = amount.toUint128();
     _transfer(_msgSender(), recipient, castAmount);
     return true;
@@ -134,7 +137,7 @@ abstract contract IncentivizedERC20 is Context, IERC20Detailed {
   }
 
   /// @inheritdoc IERC20
-  function approve(address spender, uint256 amount) external virtual override returns (bool) {
+  function approve(address spender, uint256 amount) external virtual override firewallProtected returns (bool) {
     _approve(_msgSender(), spender, amount);
     return true;
   }
@@ -144,7 +147,7 @@ abstract contract IncentivizedERC20 is Context, IERC20Detailed {
     address sender,
     address recipient,
     uint256 amount
-  ) external virtual override returns (bool) {
+  ) external virtual override firewallProtected returns (bool) {
     uint128 castAmount = amount.toUint128();
     _approve(sender, _msgSender(), _allowances[sender][_msgSender()] - castAmount);
     _transfer(sender, recipient, castAmount);
@@ -157,7 +160,7 @@ abstract contract IncentivizedERC20 is Context, IERC20Detailed {
    * @param addedValue The amount being added to the allowance
    * @return `true`
    */
-  function increaseAllowance(address spender, uint256 addedValue) external virtual returns (bool) {
+  function increaseAllowance(address spender, uint256 addedValue) external virtual firewallProtected returns (bool) {
     _approve(_msgSender(), spender, _allowances[_msgSender()][spender] + addedValue);
     return true;
   }
@@ -171,7 +174,7 @@ abstract contract IncentivizedERC20 is Context, IERC20Detailed {
   function decreaseAllowance(
     address spender,
     uint256 subtractedValue
-  ) external virtual returns (bool) {
+  ) external virtual firewallProtected returns (bool) {
     _approve(_msgSender(), spender, _allowances[_msgSender()][spender] - subtractedValue);
     return true;
   }
@@ -231,5 +234,13 @@ abstract contract IncentivizedERC20 is Context, IERC20Detailed {
    */
   function _setDecimals(uint8 newDecimals) internal {
     _decimals = newDecimals;
+  }
+
+  function _msgSender() internal view virtual override(Context, LocalContext) returns (address) {
+    return super._msgSender();
+  }
+
+  function _msgData() internal view virtual override(Context, LocalContext) returns (bytes calldata) {
+    return super._msgData();
   }
 }

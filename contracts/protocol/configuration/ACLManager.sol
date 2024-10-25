@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.12;
 
+import {VennFirewallConsumer} from "@ironblocks/firewall-consumer/contracts/consumers/VennFirewallConsumer.sol";
 import {AccessControl} from '../../dependencies/openzeppelin/contracts/AccessControl.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
+import {Context} from '@openzeppelin/contracts/utils/Context.sol';
+import {LocalContext} from '../../dependencies/openzeppelin/contracts/LocalContext.sol';
 
 /**
  * @title ACLManager
  * @author Aave
  * @notice Access Control List Manager. Main registry of system roles and permissions.
  */
-contract ACLManager is AccessControl, IACLManager {
+contract ACLManager is VennFirewallConsumer, AccessControl, IACLManager {
   bytes32 public constant override POOL_ADMIN_ROLE = keccak256('POOL_ADMIN');
   bytes32 public constant override EMERGENCY_ADMIN_ROLE = keccak256('EMERGENCY_ADMIN');
   bytes32 public constant override RISK_ADMIN_ROLE = keccak256('RISK_ADMIN');
@@ -37,17 +40,17 @@ contract ACLManager is AccessControl, IACLManager {
   function setRoleAdmin(
     bytes32 role,
     bytes32 adminRole
-  ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+  ) external override onlyRole(DEFAULT_ADMIN_ROLE) firewallProtected {
     _setRoleAdmin(role, adminRole);
   }
 
   /// @inheritdoc IACLManager
-  function addPoolAdmin(address admin) external override {
+  function addPoolAdmin(address admin) external override firewallProtected {
     grantRole(POOL_ADMIN_ROLE, admin);
   }
 
   /// @inheritdoc IACLManager
-  function removePoolAdmin(address admin) external override {
+  function removePoolAdmin(address admin) external override firewallProtected {
     revokeRole(POOL_ADMIN_ROLE, admin);
   }
 
@@ -57,12 +60,12 @@ contract ACLManager is AccessControl, IACLManager {
   }
 
   /// @inheritdoc IACLManager
-  function addEmergencyAdmin(address admin) external override {
+  function addEmergencyAdmin(address admin) external override firewallProtected {
     grantRole(EMERGENCY_ADMIN_ROLE, admin);
   }
 
   /// @inheritdoc IACLManager
-  function removeEmergencyAdmin(address admin) external override {
+  function removeEmergencyAdmin(address admin) external override firewallProtected {
     revokeRole(EMERGENCY_ADMIN_ROLE, admin);
   }
 
@@ -72,12 +75,12 @@ contract ACLManager is AccessControl, IACLManager {
   }
 
   /// @inheritdoc IACLManager
-  function addRiskAdmin(address admin) external override {
+  function addRiskAdmin(address admin) external override firewallProtected {
     grantRole(RISK_ADMIN_ROLE, admin);
   }
 
   /// @inheritdoc IACLManager
-  function removeRiskAdmin(address admin) external override {
+  function removeRiskAdmin(address admin) external override firewallProtected {
     revokeRole(RISK_ADMIN_ROLE, admin);
   }
 
@@ -87,12 +90,12 @@ contract ACLManager is AccessControl, IACLManager {
   }
 
   /// @inheritdoc IACLManager
-  function addFlashBorrower(address borrower) external override {
+  function addFlashBorrower(address borrower) external override firewallProtected {
     grantRole(FLASH_BORROWER_ROLE, borrower);
   }
 
   /// @inheritdoc IACLManager
-  function removeFlashBorrower(address borrower) external override {
+  function removeFlashBorrower(address borrower) external override firewallProtected {
     revokeRole(FLASH_BORROWER_ROLE, borrower);
   }
 
@@ -102,12 +105,12 @@ contract ACLManager is AccessControl, IACLManager {
   }
 
   /// @inheritdoc IACLManager
-  function addBridge(address bridge) external override {
+  function addBridge(address bridge) external override firewallProtected {
     grantRole(BRIDGE_ROLE, bridge);
   }
 
   /// @inheritdoc IACLManager
-  function removeBridge(address bridge) external override {
+  function removeBridge(address bridge) external override firewallProtected {
     revokeRole(BRIDGE_ROLE, bridge);
   }
 
@@ -117,17 +120,25 @@ contract ACLManager is AccessControl, IACLManager {
   }
 
   /// @inheritdoc IACLManager
-  function addAssetListingAdmin(address admin) external override {
+  function addAssetListingAdmin(address admin) external override firewallProtected {
     grantRole(ASSET_LISTING_ADMIN_ROLE, admin);
   }
 
   /// @inheritdoc IACLManager
-  function removeAssetListingAdmin(address admin) external override {
+  function removeAssetListingAdmin(address admin) external override firewallProtected {
     revokeRole(ASSET_LISTING_ADMIN_ROLE, admin);
   }
 
   /// @inheritdoc IACLManager
   function isAssetListingAdmin(address admin) external view override returns (bool) {
     return hasRole(ASSET_LISTING_ADMIN_ROLE, admin);
+  }
+
+  function _msgSender() internal view virtual override(Context, LocalContext) returns (address) {
+    return super._msgSender();
+  }
+
+  function _msgData() internal view virtual override(Context, LocalContext) returns (bytes calldata) {
+    return super._msgData();
   }
 }

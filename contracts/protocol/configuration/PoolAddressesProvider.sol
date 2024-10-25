@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.12;
 
+import {VennFirewallConsumer} from "@ironblocks/firewall-consumer/contracts/consumers/VennFirewallConsumer.sol";
 import {Ownable} from '../../dependencies/openzeppelin/contracts/Ownable.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {InitializableImmutableAdminUpgradeabilityProxy} from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
+import {Context} from '@openzeppelin/contracts/utils/Context.sol';
+import {LocalContext} from '../../dependencies/openzeppelin/contracts/LocalContext.sol';
 
 /**
  * @title PoolAddressesProvider
@@ -12,7 +15,7 @@ import {InitializableImmutableAdminUpgradeabilityProxy} from '../libraries/aave-
  * @dev Acts as factory of proxies and admin of those, so with right to change its implementations
  * @dev Owned by the Aave Governance
  */
-contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
+contract PoolAddressesProvider is VennFirewallConsumer, Ownable, IPoolAddressesProvider {
   // Identifier of the Aave Market
   string private _marketId;
 
@@ -44,7 +47,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /// @inheritdoc IPoolAddressesProvider
-  function setMarketId(string memory newMarketId) external override onlyOwner {
+  function setMarketId(string memory newMarketId) external override onlyOwner firewallProtected {
     _setMarketId(newMarketId);
   }
 
@@ -54,7 +57,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /// @inheritdoc IPoolAddressesProvider
-  function setAddress(bytes32 id, address newAddress) external override onlyOwner {
+  function setAddress(bytes32 id, address newAddress) external override onlyOwner firewallProtected {
     address oldAddress = _addresses[id];
     _addresses[id] = newAddress;
     emit AddressSet(id, oldAddress, newAddress);
@@ -64,7 +67,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   function setAddressAsProxy(
     bytes32 id,
     address newImplementationAddress
-  ) external override onlyOwner {
+  ) external override onlyOwner firewallProtected {
     address proxyAddress = _addresses[id];
     address oldImplementationAddress = _getProxyImplementation(id);
     _updateImpl(id, newImplementationAddress);
@@ -77,7 +80,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /// @inheritdoc IPoolAddressesProvider
-  function setPoolImpl(address newPoolImpl) external override onlyOwner {
+  function setPoolImpl(address newPoolImpl) external override onlyOwner firewallProtected {
     address oldPoolImpl = _getProxyImplementation(POOL);
     _updateImpl(POOL, newPoolImpl);
     emit PoolUpdated(oldPoolImpl, newPoolImpl);
@@ -89,7 +92,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /// @inheritdoc IPoolAddressesProvider
-  function setPoolConfiguratorImpl(address newPoolConfiguratorImpl) external override onlyOwner {
+  function setPoolConfiguratorImpl(address newPoolConfiguratorImpl) external override onlyOwner firewallProtected {
     address oldPoolConfiguratorImpl = _getProxyImplementation(POOL_CONFIGURATOR);
     _updateImpl(POOL_CONFIGURATOR, newPoolConfiguratorImpl);
     emit PoolConfiguratorUpdated(oldPoolConfiguratorImpl, newPoolConfiguratorImpl);
@@ -101,7 +104,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /// @inheritdoc IPoolAddressesProvider
-  function setPriceOracle(address newPriceOracle) external override onlyOwner {
+  function setPriceOracle(address newPriceOracle) external override onlyOwner firewallProtected {
     address oldPriceOracle = _addresses[PRICE_ORACLE];
     _addresses[PRICE_ORACLE] = newPriceOracle;
     emit PriceOracleUpdated(oldPriceOracle, newPriceOracle);
@@ -113,7 +116,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /// @inheritdoc IPoolAddressesProvider
-  function setACLManager(address newAclManager) external override onlyOwner {
+  function setACLManager(address newAclManager) external override onlyOwner firewallProtected {
     address oldAclManager = _addresses[ACL_MANAGER];
     _addresses[ACL_MANAGER] = newAclManager;
     emit ACLManagerUpdated(oldAclManager, newAclManager);
@@ -125,7 +128,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /// @inheritdoc IPoolAddressesProvider
-  function setACLAdmin(address newAclAdmin) external override onlyOwner {
+  function setACLAdmin(address newAclAdmin) external override onlyOwner firewallProtected {
     address oldAclAdmin = _addresses[ACL_ADMIN];
     _addresses[ACL_ADMIN] = newAclAdmin;
     emit ACLAdminUpdated(oldAclAdmin, newAclAdmin);
@@ -137,7 +140,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /// @inheritdoc IPoolAddressesProvider
-  function setPriceOracleSentinel(address newPriceOracleSentinel) external override onlyOwner {
+  function setPriceOracleSentinel(address newPriceOracleSentinel) external override onlyOwner firewallProtected {
     address oldPriceOracleSentinel = _addresses[PRICE_ORACLE_SENTINEL];
     _addresses[PRICE_ORACLE_SENTINEL] = newPriceOracleSentinel;
     emit PriceOracleSentinelUpdated(oldPriceOracleSentinel, newPriceOracleSentinel);
@@ -149,7 +152,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /// @inheritdoc IPoolAddressesProvider
-  function setPoolDataProvider(address newDataProvider) external override onlyOwner {
+  function setPoolDataProvider(address newDataProvider) external override onlyOwner firewallProtected {
     address oldDataProvider = _addresses[DATA_PROVIDER];
     _addresses[DATA_PROVIDER] = newDataProvider;
     emit PoolDataProviderUpdated(oldDataProvider, newDataProvider);
@@ -205,5 +208,13 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
       address payable payableProxyAddress = payable(proxyAddress);
       return InitializableImmutableAdminUpgradeabilityProxy(payableProxyAddress).implementation();
     }
+  }
+
+  function _msgSender() internal view virtual override(Context, LocalContext) returns (address) {
+    return super._msgSender();
+  }
+
+  function _msgData() internal view virtual override(Context, LocalContext) returns (bytes calldata) {
+    return super._msgData();
   }
 }

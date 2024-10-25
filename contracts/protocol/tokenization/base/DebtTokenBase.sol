@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.12;
 
-import {Context} from '../../../dependencies/openzeppelin/contracts/Context.sol';
+import {VennFirewallConsumer} from "@ironblocks/firewall-consumer/contracts/consumers/VennFirewallConsumer.sol";
+import {LocalContext} from '../../../dependencies/openzeppelin/contracts/LocalContext.sol';
+import {Context} from '@openzeppelin/contracts/utils/Context.sol';
 import {Errors} from '../../libraries/helpers/Errors.sol';
 import {VersionedInitializable} from '../../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {ICreditDelegationToken} from '../../../interfaces/ICreditDelegationToken.sol';
@@ -13,9 +15,10 @@ import {EIP712Base} from './EIP712Base.sol';
  * @notice Base contract for different types of debt tokens, like StableDebtToken or VariableDebtToken
  */
 abstract contract DebtTokenBase is
+  VennFirewallConsumer,
   VersionedInitializable,
   EIP712Base,
-  Context,
+  LocalContext,
   ICreditDelegationToken
 {
   // Map of borrow allowances (delegator => delegatee => borrowAllowanceAmount)
@@ -35,7 +38,7 @@ abstract contract DebtTokenBase is
   }
 
   /// @inheritdoc ICreditDelegationToken
-  function approveDelegation(address delegatee, uint256 amount) external override {
+  function approveDelegation(address delegatee, uint256 amount) external override firewallProtected {
     _approveDelegation(_msgSender(), delegatee, amount);
   }
 
@@ -98,5 +101,13 @@ abstract contract DebtTokenBase is
     _borrowAllowances[delegator][delegatee] = newAllowance;
 
     emit BorrowAllowanceDelegated(delegator, delegatee, _underlyingAsset, newAllowance);
+  }
+
+  function _msgSender() internal view virtual override(Context, LocalContext) returns (address) {
+    return super._msgSender();
+  }
+
+  function _msgData() internal view virtual override(Context, LocalContext) returns (bytes calldata) {
+    return super._msgData();
   }
 }
