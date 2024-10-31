@@ -13,6 +13,7 @@ export enum eEthereumNetwork {
   coverage = 'coverage',
   hardhat = 'hardhat',
   tenderlyMain = 'tenderlyMain',
+  holesky = 'holesky',
 }
 
 export enum eContractid {
@@ -352,6 +353,7 @@ export interface iEthereumParamsPerNetwork<T> {
   [eEthereumNetwork.main]: T;
   [eEthereumNetwork.hardhat]: T;
   [eEthereumNetwork.tenderlyMain]: T;
+  [eEthereumNetwork.holesky]: T;
 }
 
 export enum RateMode {

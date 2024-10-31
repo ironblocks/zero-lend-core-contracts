@@ -42,6 +42,7 @@
     "@matterlabs/hardhat-zksync-solc": "0.4.1",
     "@nomicfoundation/hardhat-chai-matchers": "1.0.5",
     "@nomicfoundation/hardhat-toolbox": "^2.0.0",
+    "@nomicfoundation/hardhat-verify": "2.0.11",
     "@tenderly/hardhat-tenderly": "1.1.0-beta.5",
     "@types/chai": "4.2.11",
     "@types/lowdb": "1.0.9",
@@ -95,6 +96,6 @@
   },
   "dependencies": {
     "@ironblocks/firewall-consumer": "1.0.17",
-    "@openzeppelin/contracts": "4.8.2"
+    "@vennbuild/venn-dapp-sdk": "0.8.5"
   }
 }

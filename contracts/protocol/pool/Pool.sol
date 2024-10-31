@@ -18,7 +18,7 @@ import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.so
 import {IPool} from '../../interfaces/IPool.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
 import {PoolStorage} from './PoolStorage.sol';
-
+import {VennFirewallConsumer} from '@ironblocks/firewall-consumer/contracts/consumers/VennFirewallConsumer.sol';
 /**
  * @title Pool contract
  * @author Aave
@@ -36,7 +36,7 @@ import {PoolStorage} from './PoolStorage.sol';
  * @dev All admin functions are callable by the PoolConfigurator contract defined also in the
  *   PoolAddressesProvider
  */
-contract Pool is VersionedInitializable, PoolStorage, IPool {
+contract Pool is VennFirewallConsumer, VersionedInitializable, PoolStorage, IPool {
   using ReserveLogic for DataTypes.ReserveData;
 
   uint256 public constant POOL_REVISION = 0x5;
@@ -117,7 +117,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
     uint256 amount,
     address onBehalfOf,
     uint16 referralCode
-  ) external virtual override onlyBridge {
+  ) external virtual override firewallProtected onlyBridge {
     BridgeLogic.executeMintUnbacked(
       _reserves,
       _reservesList,
@@ -134,7 +134,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
     address asset,
     uint256 amount,
     uint256 fee
-  ) external virtual override onlyBridge returns (uint256) {
+  ) external virtual override firewallProtected onlyBridge returns (uint256) {
     return
       BridgeLogic.executeBackUnbacked(_reserves[asset], asset, amount, fee, _bridgeProtocolFee);
   }
@@ -442,7 +442,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
   }
 
   /// @inheritdoc IPool
-  function mintToTreasury(address[] calldata assets) external virtual override  {
+  function mintToTreasury(address[] calldata assets) external virtual override firewallProtected  {
     PoolLogic.executeMintToTreasury(_reserves, assets);
   }
 
@@ -605,7 +605,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
     address stableDebtAddress,
     address variableDebtAddress,
     address interestRateStrategyAddress
-  ) external virtual override onlyPoolConfigurator {
+  ) external virtual override firewallProtected onlyPoolConfigurator {
     if (
       PoolLogic.executeInitReserve(
         _reserves,
@@ -684,7 +684,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
   }
 
   /// @inheritdoc IPool
-  function setUserEMode(uint8 categoryId) external virtual override {
+  function setUserEMode(uint8 categoryId) external virtual override firewallProtected {
     EModeLogic.executeSetUserEMode(
       _reserves,
       _reservesList,
@@ -727,7 +727,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
     uint256 amount,
     address onBehalfOf,
     uint16 referralCode
-  ) external virtual override {
+  ) external virtual override firewallProtected {
     SupplyLogic.executeSupply(
       _reserves,
       _reservesList,

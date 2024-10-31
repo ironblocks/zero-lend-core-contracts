@@ -1,0 +1,33 @@
+{
+    "networks": {
+        "holesky": {
+            "contracts": {
+                "PoolAddressesProviderRegistry": "0x2F3BD966988d52D0525F7F1663E0A924881adEf1",
+                "PoolAddressesProvider": "0xfb62D1B4d0802634fF1F328267B93037b852107D",
+                "ACLManager": "0xf7c97d474CB71d3eA252c455EC70Ec0d084A7eb2",
+                "Pool": "0xb8D338f5869740e432b27b017609B3d3872fe8ae",
+                "PoolConfigurator": "0x90504d48EE7229AdD16A110F811717A01C827053",
+                "AToken": "0x728F00FCE22aC155B58b08a93675aF8164c888e0",
+                "DelegationAwareAToken": "0x532EAcfca225ffb066e8Ff7AF6520C4fE627BD10",
+                "StableDebtToken": "0x9C305C76C3DeC113185F891156C8821e215A87Bd",
+                "VariableDebtToken": "0x4630e329246123710551DD5bc2e82c4b06DadA9E",
+                "AAVE-AToken-Test": "0xc0de8FF0aAEB01137e649913a0b7C39566c67460",
+                "AAVE-StableDebtToken-Test": "0x4FE7d5e37d017758ec823a7B65D57F6E0cC40B90",
+                "AAVE-VariableDebtToken-Test": "0xdcBB383704f379E697c24EFbfa14fFEe4043C58B",
+                "DAI-AToken-Test": "0xbac15167F4D6302668312640C096D6df92ab189a",
+                "DAI-StableDebtToken-Test": "0xB4e12326A9ADC3E493bC16Fc051e97F1b2AC0B7a",
+                "DAI-VariableDebtToken-Test": "0xDE4e1cA71042B214e6d456943804373792f5F5e2",
+                "LINK-AToken-Test": "0xfd215e5172fB0D1160f11BFfDDE0ad33eB133988",
+                "LINK-StableDebtToken-Test": "0x771D1F1d02CAF98bBf0482eC99C25DEe00F0382D",
+                "LINK-VariableDebtToken-Test": "0xCbe1d8f075C421D55a3700DA900B5bF5E55B66C2",
+                "USDC-AToken-Test": "0xeFf88Db01d4693A55a46B7868110Cb2d3c2de05E",
+                "USDC-StableDebtToken-Test": "0xD1C839BeE3C84CfC67987412716A6344E561274B",
+                "USDC-VariableDebtToken-Test": "0x4416Da3034bAA529747b0E0851f49F7Ac873034F",
+                "WETH-AToken-Test": "0x33a77A9896a68b0075Cbe8864114A878E8a1B6f7",
+                "WETH-StableDebtToken-Test": "0x2fCB1A3b781f1653bA8CaD85849bB2EAb06afA26",
+                "WETH-VariableDebtToken-Test": "0x6F82a926652758F008415b4e90494242C21A31d7"
+            },
+            "ApprovedCalls": "0x7Ec60768E1C4322d388dC6ca55C8DD2f1750c6fC"
+        }
+    }
+}

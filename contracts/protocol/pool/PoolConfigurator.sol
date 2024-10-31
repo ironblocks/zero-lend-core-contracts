@@ -90,7 +90,7 @@ contract PoolConfigurator is VennFirewallConsumer, VersionedInitializable, IPool
     }
 
     /// @inheritdoc IPoolConfigurator
-    function dropReserve(address asset) external override onlyPoolAdmin  {
+    function dropReserve(address asset) external override firewallProtected onlyPoolAdmin  {
         _pool.dropReserve(asset);
         emit ReserveDropped(asset);
     }

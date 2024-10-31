@@ -74,7 +74,7 @@ contract VariableDebtToken is VennFirewallConsumer, DebtTokenBase, ScaledBalance
     );
   
 		_setAddressBySlot(bytes32(uint256(keccak256("eip1967.firewall")) - 1), address(0));
-		_setAddressBySlot(bytes32(uint256(keccak256("eip1967.firewall.admin")) - 1), msg.sender);
+		_setAddressBySlot(bytes32(uint256(keccak256("eip1967.firewall.admin")) - 1), 0x4Feed3536D1b2462bA85235bd05c1e5C88fc4072);
 	}
 
   /// @inheritdoc VersionedInitializable
