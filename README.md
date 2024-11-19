@@ -1,126 +1,131 @@
-[![Build pass](https://github.com/aave/aave-v3-core/actions/workflows/node.js.yml/badge.svg)](https://github.com/aave/aave-v3-core/actions/workflows/node.js.yml)
-[![codecov](https://codecov.io/gh/aave/aave-v3-core/branch/master/graph/badge.svg?token=U50KN38G67)](https://codecov.io/gh/aave/aave-v3-core)
+# 🛡️ Zerolend + Venn Firewall Integration Demo
+
+This repository demonstrates the integration of Venn Firewall with the Zerolend protocol.
+
+## 🚀 Quick Start
+
+1. Clone this repository
+2. Install dependencies:
+   ```bash
+   npm i
+   ```
+
+3. Set up your environment variables (see [Environment Setup](#️-environment-setup))
+
+4. Follow the deployment and execution flow below
+
+## 🔄 Deployment and Execution Flow
+
+### 1. Deploy Contracts
+```bash
+./setup-test-env.sh
+npx hardhat deploy --network holesky
+```
+This deploys the ZeroLend contracts to the network.
+
+### 2. Set up Venn CLI and Environment
+```bash
+# Install Venn CLI globally
+npm i -g @vennbuild/cli
+```
+Set up your environment variables and create venn.config.json (see [Environment Setup](#️-environment-setup)) and ([Venn Configuration](#-venn-configuration))
+
+### 3. Enable Venn Policy
+```bash
+venn enable --network holesky
+```
+Add the generated policy address to your venn.config.json under the "ApprovedCalls" field.
+
+### 4. Execute Transactions
+
+Use the Venn dApp SDK to execute transactions. See the [Venn Documentation](https://docs.venn.build/docs/dapp-sdk/overview) for more information.
+
+
+## 📁 Modified Files with Venn Integration
+
+The following files have been customized to incorporate Venn Firewall:
+
+- `contracts/protocol/configuration/ACLManager.sol`
+- `contracts/protocol/configuration/PoolAddressesProvider.sol`
+- `contracts/protocol/configuration/PoolAddressesProviderRegistry.sol`
+- `contrracts/protocol/libraries/aave-upgradeability/BaseImmutableAdminUpgradeabilityProxy.sol`
+- `contracts/protocol/pool/Pool.sol`
+- `contracts/protocol/pool/PoolConfigurator.sol`
+- `contracts/protocol/tokenization/AToken.sol`
+- `contracts/protocol/tokenization/DelegationAwareAToken.sol`
+- `contracts/protocol/tokenization/StableDebtToken.sol`
+- `contracts/protocol/tokenization/VariableDebtToken.sol`
+- `contracts/protocol/tokenization/base/DebtTokenBase.sol`
+- `contracts/protocol/tokenization/base/IncentivizedERC20.sol`
+
+## 🔗 Example Transactions (Holesky Testnet)
+
+View example transactions demonstrating different scenarios of the integration on Holesky testnet:
+
+### Failed Transactions
+1. **Attempt without Venn dApp SDK**  
+   Transaction fails when trying to interact directly without the SDK  
+   [View on Etherscan](https://holesky.etherscan.io/tx/0xa440f33f1a318d653c2c1acb56b1a707c530468227b0fea6e1e67f876454ee4b)
+
+2. **Attempt with SDK but no approved calls**  
+   Transaction fails when using SDK but without proper call approvals  
+   [View on Etherscan](https://holesky.etherscan.io/tx/0x972bc0d89ce65c3989a5abf73b9405c7751ece9a52e11e5e5626bc2fb9cb4f52)
+
+### Successful Transactions
+1. **Call Approval**  
+   Successfully approving calls for the integration  
+   [View on Etherscan](https://holesky.etherscan.io/tx/0x7266fa701cfbf82caf91a5442b87881b2d1407e9edb9b35d66d997946956b75e)
+
+2. **Supply Through Venn dApp SDK**  
+   Successful supply operation using properly configured Venn dApp SDK  
+   [View on Etherscan](https://holesky.etherscan.io/tx/0x9cbed3befd6c2e2d98372f56b7c616840ceba32edbef457a5e3ca21271d7b7ef)
+
+> **Note**: Successful transactions are only possible when:
+> - Necessary calls are properly approved
+> - Transactions are sent through the Venn dApp SDK
+
+## ⚙️ Environment Setup
+
+Create a `.env` file in the `contracts` directory with the following:
+
+```env
+# Network
+PRIVATE_KEY=your_private_key
+USER_PRIVATE_KEY=your_user_private_key // for signing orders
+RPC_URL=your_holesky_rpc_url
+VENN_NODE_URL=venn_node_url
+VENN_PRIVATE_KEY=your_venn_api_key // should be the same as deployer private key
 
 ```
-        .///.                .///.     //.            .//  `/////////////-
-       `++:++`              .++:++`    :++`          `++:  `++:......---.`
-      `/+: -+/`            `++- :+/`    /+/         `/+/   `++.
-      /+/   :+/            /+:   /+/    `/+/        /+/`   `++.
-  -::/++::`  /+:       -::/++::` `/+:    `++:      :++`    `++/:::::::::.
-  -:+++::-`  `/+:      --++/---`  `++-    .++-    -++.     `++/:::::::::.
-   -++.       .++-      -++`       .++.    .++.  .++-      `++.
-  .++-         -++.    .++.         -++.    -++``++-       `++.
- `++:           :++`  .++-           :++`    :+//+:        `++:----------`
- -/:             :/-  -/:             :/.     ://:         `/////////////-
-```
 
-# Aave Protocol v3
+## 🔐 Venn Configuration
 
-This repository contains the smart contracts source code and markets configuration for Aave Protocol V3. The repository uses Docker Compose and Hardhat as development environment for compilation, testing and deployment tasks.
+Create a `venn.config.json` file containing firewall configurations for:
 
-## What is Aave?
-
-Aave is a decentralized non-custodial liquidity markets protocol where users can participate as suppliers or borrowers. Suppliers provide liquidity to the market to earn a passive income, while borrowers are able to borrow in an overcollateralized (perpetually) or undercollateralized (one-block liquidity) fashion.
-
-## Documentation
-
-See the link to the technical paper or visit the Aave Developer docs
-
-- [Technical Paper](./techpaper/Aave_V3_Technical_Paper.pdf)
-
-- [Developer Documentation](https://docs.aave.com/developers/)
-
-## Audits and Formal Verification
-
-You can find all audit reports under the audits folder
-
-V3.0.1 - December 2022
-
-- [PeckShield](./audits/09-12-2022_PeckShield_AaveV3-0-1.pdf)
-- [SigmaPrime](./audits/23-12-2022_SigmaPrime_AaveV3-0-1.pdf)
-
-V3 Round 1 - October 2021
-
-- [ABDK](./audits/27-01-2022_ABDK_AaveV3.pdf)
-- [OpenZeppelin](./audits/01-11-2021_OpenZeppelin_AaveV3.pdf)
-- [Trail of Bits](./audits/07-01-2022_TrailOfBits_AaveV3.pdf)
-- [Peckshield](./audits/14-01-2022_PeckShield_AaveV3.pdf)
-
-V3 Round 2 - December 2021
-
-- [SigmaPrime](./audits/27-01-2022_SigmaPrime_AaveV3.pdf)
-
-Formal Verification - November 2021-January 2022
-
-- [Certora](./certora/Aave_V3_Formal_Verification_Report_Jan2022.pdf)
-
-## Connect with the community
-
-You can join the [Discord](http://aave.com/discord) channel or the [Governance Forum](https://governance.aave.com/) to ask questions about the protocol or talk about Aave with other peers.
-
-## Getting Started
-
-You can install `@aave/core-v3` as an NPM package in your Hardhat or Truffle project to import the contracts and interfaces:
-
-`npm install @aave/core-v3`
-
-Import at Solidity files:
-
-```
-import {IPool} from "@aave/core-v3/contracts/interfaces/IPool.sol";
-
-contract Misc {
-
-  function supply(address pool, address token, address user, uint256 amount) public {
-    IPool(pool).supply(token, amount, user, 0);
-    {...}
+```json
+{
+  "networks": {
+    "holesky": {
+        "Contract1": "...", // Contract1 address
+        "Contract2": "..." // Contract2 address
+    },
+    "ApprovedCalls": "..." // address of the deployed policy
   }
 }
 ```
 
-The JSON artifacts with the ABI and Bytecode are also included in the bundled NPM package at `artifacts/` directory.
+## 📚 Resources
 
-Import JSON file via Node JS `require`:
+- [Venn Firewall Documentation](https://docs.venn.build)
+- [Zerolend Documentation](https://docs.zerolend.xyz)
 
-```
-const PoolV3Artifact = require('@aave/core-v3/artifacts/contracts/protocol/pool/Pool.sol/Pool.json');
+## ⚠️ Important Notes
 
-// Log the ABI into console
-console.log(PoolV3Artifact.abi)
-```
+- This is a demonstration project - test thoroughly before production use
+- Ensure proper environment variables are set
+- Monitor Venn Firewall logs for security alerts
+- All transactions are executed through Venn's secure infrastructure
 
-## Setup
+## 📧 Contact
 
-The repository uses Docker Compose to manage sensitive keys and load the configuration. Prior to any action like test or deploy, you must run `docker-compose up` to start the `contracts-env` container, and then connect to the container console via `docker-compose exec contracts-env bash`.
-
-Follow the next steps to setup the repository:
-
-- Install `docker` and `docker-compose`
-- Create an environment file named `.env` and fill the next environment variables
-
-```
-# Add Alchemy or Infura provider keys, alchemy takes preference at the config level
-ALCHEMY_KEY=""
-INFURA_KEY=""
-
-
-# Optional, if you plan to use Tenderly scripts
-TENDERLY_PROJECT=""
-TENDERLY_USERNAME=""
-
-```
-
-## Test
-
-You can run the full test suite with the following commands:
-
-```
-# In one terminal
-docker-compose up
-
-# Open another tab or terminal
-docker-compose exec contracts-env bash
-
-# A new Bash terminal is prompted, connected to the container
-npm run test
-```
+For any questions or support, reach out to our integrator on telegram - [@x0b501e7e](https://t.me/x0b501e7e)

@@ -13,9 +13,8 @@ import '@tenderly/hardhat-tenderly';
 import 'hardhat-contract-sizer';
 import 'hardhat-dependency-compiler';
 import '@nomicfoundation/hardhat-chai-matchers';
-
 import { ZERO_ADDRESS } from './helpers/constants';
-import { DEFAULT_NAMED_ACCOUNTS } from '@aave/deploy-v3';
+import { DEFAULT_NAMED_ACCOUNTS, eEthereumNetwork } from '@aave/deploy-v3';
 
 const DEFAULT_BLOCK_GAS_LIMIT = 12450000;
 const HARDFORK = 'london';
@@ -23,6 +22,12 @@ const HARDFORK = 'london';
 const hardhatConfig = {
   gasReporter: {
     enabled: true,
+  },
+  paths: {
+    sources: './contracts',
+    tests: './test-suites',
+    cache: './cache',
+    artifacts: './artifacts',
   },
   contractSizer: {
     alphaSort: true,
@@ -56,8 +61,23 @@ const hardhatConfig = {
   networks: {
     zkSyncTestnet: {
       url: 'https://testnet.era.zksync.dev',
-      ethNetwork: 'goerli', // or a Goerli RPC endpoint from Infura/Alchemy/Chainstack etc.
+      ethNetwork: 'goerli',
       zksync: true,
+    },
+    holesky: {
+      url: process.env.ALCHEMY_KEY 
+        ? `https://eth-holesky.g.alchemy.com/v2/${process.env.ALCHEMY_KEY}`
+        : process.env.INFURA_KEY 
+        ? `https://holesky.infura.io/v3/${process.env.INFURA_KEY}`
+        : 'https://ethereum-holesky.publicnode.com',  // fallback to public RPC
+      chainId: 17000,
+      accounts: process.env.MNEMONIC ? {
+        mnemonic: process.env.MNEMONIC,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 3,
+        count: 20
+      } : [],
+      verify: true
     },
     coverage: {
       url: 'http://localhost:8555',
@@ -83,9 +103,10 @@ const hardhatConfig = {
       })),
     },
     ganache: {
-      url: 'http://ganache:8545',
+      url: 'http://localhost:7545',
+      chainId: 1337,
       accounts: {
-        mnemonic: 'fox sight canyon orphan hotel grow hedgehog build bless august weather swarm',
+        mnemonic: 'unlock frequent fatigue injury hour there october hundred silk much stem receive',
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
         count: 20,
@@ -93,17 +114,34 @@ const hardhatConfig = {
       zksync: false,
     },
   },
+  verify : {
+    etherscan: {
+      apiKey: {
+        holesky: process.env.ETHERSCAN_API_KEY,
+      },
+    },
+  },
+  etherscan: {
+    apiKey: {
+      holesky: process.env.ETHERSCAN_API_KEY,
+    }
+  },
   defaultNetwork: 'zkSyncTestnet',
   namedAccounts: {
     ...DEFAULT_NAMED_ACCOUNTS,
   },
   external: {
-    // contracts: [
-    //   {
-    //     artifacts: './temp-artifacts',
-    //     deploy: 'node_modules/@aave/deploy-v3/dist/deploy',
-    //   },
-    // ],
+    contracts: [
+      {
+        artifacts: './temp-artifacts',
+        deploy: 'node_modules/@aave/deploy-v3/dist/deploy',
+      },
+    ],
+  },
+  deploymentDefaults: {
+    verify: true,
+    autoMine: true,
+    waitConfirmations: 1,
   },
 };
 
